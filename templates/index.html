@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Traffic Flow Prediction - Bahria University FYP</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f7fa;
+            color: #333;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #003087, #004080);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.2em;
+        }
+        .header .subtitle {
+            font-size: 1.1em;
+            margin: 10px 0;
+            opacity: 0.9;
+        }
+        .project-info {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            background: #fafafa;
+        }
+        .project-info p {
+            margin: 8px 0;
+            font-size: 1.05em;
+        }
+        .project-info strong {
+            color: #003087;
+        }
+        .content {
+            padding: 30px;
+        }
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #003087;
+        }
+        input[type="date"], input[type="time"] {
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            width: 220px;
+        }
+        button {
+            padding: 5px 10px;
+            background: #d4a017;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #b88c14;
+        }
+        #loading {
+            display: none;
+            text-align: center;
+            font-size: 1.2em;
+            color: #003087;
+            margin: 20px 0;
+        }
+        .error {
+            color: #c0392b;
+            font-weight: bold;
+            text-align: center;
+            margin: 15px 0;
+        }
+        .peak-summary {
+            margin: 10px 0 20px 0;
+            padding: 12px 14px;
+            background: #fff7e1;
+            border: 1px solid #f2dd9a;
+            border-radius: 8px;
+        }
+        .peak-badge {
+            color: #8a5a00;
+            font-weight: 700;
+        }
+        .result-section {
+            margin-top: 40px;
+        }
+        h2 {
+            color: #003087;
+            border-bottom: 2px solid #d4a017;
+            padding-bottom: 10px;
+        }
+        img {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.95em;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background: #003087;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        .download-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #27ae60;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        .download-btn:hover {
+            background: #219653;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            font-size: 0.9em;
+            border-top: 1px solid #eee;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Real-Time Traffic Flow Prediction</h1>
+    </div>
+
+    <div class="content">
+        <h2>Predict Future Traffic Volume</h2>
+        <p>Select a starting date and time to forecast hourly vehicle counts only for the selected day.</p>
+
+        <form method="POST" action="{{ url_for('predict') }}" id="predictForm">
+            <div class="form-group">
+                <label for="start_date">Start Date:</label>
+                <input type="date" id="start_date" name="start_date" required>
+            </div>
+            <div class="form-group">
+                <label for="start_time">Start Time:</label>
+                <input type="time" id="start_time" name="start_time" value="00:00">
+            </div>
+            <button type="submit">Generate Prediction</button>
+        </form>
+
+        <div id="loading">Predicting traffic flow... Please wait...</div>
+
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+
+        {% if prediction_table %}
+            <div class="result-section">
+                <h2>Prediction Results starting from: {{ start_str }}</h2>
+
+                {% if plot_url %}
+                    <img src="data:image/png;base64,{{ plot_url }}" alt="Traffic Prediction Chart">
+                {% endif %}
+
+                <table>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Predicted Vehicle Count</th>
+                        <th>Peak Hour</th>
+                    </tr>
+                    {% for timestamp, count, is_peak in prediction_table %}
+                    <tr>
+                        <td>{{ timestamp }}</td>
+                        <td>{{ count }}</td>
+                        <td>{% if is_peak %}<span class="peak-badge">Peak</span>{% else %}-{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+
+                {% if peak_hours %}
+                    <div class="peak-summary">
+                        <strong>Peak Hours</strong> (above normal level {{ normal_threshold }}):
+                        <ul>
+                            {% for peak_time, peak_count in peak_hours %}
+                            <li>{{ peak_time }} - {{ peak_count }} vehicles</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <!-- Optional: Add CSV download if you implement it in Flask -->
+                <!-- <a href="/download" class="download-btn">Download Predictions as CSV</a> -->
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<script>
+    document.getElementById('predictForm').addEventListener('submit', function() {
+        document.getElementById('loading').style.display = 'block';
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,7 @@
+cat <<EOF > .gitignore
+    *.pt
+    *.pth
+    *.pkl
+    __pycache__/
+    .env
+EOF

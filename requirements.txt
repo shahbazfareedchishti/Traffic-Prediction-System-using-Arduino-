@@ -1,0 +1,8 @@
+flask
+torch
+pandas
+numpy
+matplotlib
+scikit-learn
+joblib
+ultralytics
