@@ -7,7 +7,7 @@ Real-Time Traffic Flow Prediction is an end-to-end traffic analytics project tha
 - LSTM-based traffic forecasting
 - A Flask web app to visualize predicted hourly traffic and peak periods
 
-This repository was developed as a Final Year Project (FYP) and is structured so it can run as a demo or be extended for production-style workflows.
+This repository was developed as a persoanl project and is structured so it can run as a demo or be extended for production-style workflows.
 
 ## Project Highlights
 
@@ -268,8 +268,3 @@ docker run --rm -p 5000:5000 traffic-flow-app
 - ESP32-CAM does not reliably encode full MP4 on-device; this design uploads frame sequences.
 - You can convert stored frames into a video later for reporting/demo purposes.
 
-## License
-
-Add your preferred license file (`LICENSE`) before public release.
-
-# Traffic-Prediction-System-using-Arduino-
